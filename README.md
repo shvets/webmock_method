@@ -18,8 +18,8 @@ Or install it yourself as:
 
 ## Usage
 
-[WebMock] [https://github.com/bblimke/webmock] is gem for stubbing HTTP requests. You can use
-it in your tests if you don't want to hit actual service while testing other functionality.
+[WebMock] (https://github.com/bblimke/webmock) is gem for stubbing HTTP requests. You can use
+it in your tests if you don't want to hit actual service while testing other functionality of your service.
 For example:
 
 ```ruby
@@ -28,13 +28,12 @@ require 'webmock'
 WebMock.stub_request(:any, "www.example.com").to_return(:body => "some body")
 
 puts Net::HTTP.get("www.example.com", "/") # some body
-
 ```
 
-It will stub all http verbs (GET, POST, PUT etc.) thanks to :any parameter.
+It will stub all http verbs (GET, POST, PUT etc.) thanks to **:any** parameter.
 
-You also can use webmock for building **stubbed versions** of your services. This approach is especially
-useful when services to be called are not ready yet (maybe by another team) and you still
+You can also use webmock library for building **stubbed versions** of your services. This approach is especially
+useful when services to be called **are not implemented yet** (maybe by another team) and you still
 want to start working on your part and finish it on time.
 
 In order to facilitate the creation of **mocked service methods**, you can use **webmock_method** gem.
@@ -42,16 +41,16 @@ In order to facilitate the creation of **mocked service methods**, you can use *
 How to use it?
 
 First, create **actual service wrapper** that works with future API of "not yet developed service". As an example,
-we can use publicly available **OpenWeather** web service.
+we can use publicly available [OpenWeatherMap](http://api.openweathermap.org) web service.
 
-We will implement call to quote weather for given city. You have to provide **location** and **units** parameters:
+We will implement call to **quote weather** for a given city. You have to provide **location** and **units** parameters:
 
 ```ruby
-# services/open_service.rb
+# services/open_weather_map_service.rb
 
 require 'net/http'
 
-class OpenWeather
+class OpenWeatherMapService
   attr_reader :url
 
   def initialize
@@ -71,14 +70,14 @@ end
 Then, create stub/mock for your service:
 
 ```ruby
-# stubs/open_service.rb
+# stubs/open_weather_map_service.rb
 
 require 'webmock_method'
 require 'json'
 
-require 'services/open_weather.rb'
+require 'services/open_weather_map_service.rb'
 
-class OpenWeather
+class OpenWeatherMapService
   extend WebmockMethod
 
   webmock_method :quote, [:location, :units], lambda { |binding|
@@ -89,18 +88,46 @@ end
 
 **webmock_method** requires you to provide the following information:
 
-- method name to be mocked;
-- parameters names for the method (same as in original service);
-- proc/lambda expression for building the response;
-- url to remote service (optional).
+* **method name** to be mocked;
+* **parameters names** for the method (same as in original service);
+* **proc/lambda** expression for building the response;
+* **url** to remote service (optional).
 
-You can build responses of arbitrary complexity with your own code or you can use RenderHelper, that comes with this
+You can build responses of arbitrary complexity with your own code or you can use **RenderHelper**, that comes with this
 gem. Currently it supports 2 formats only: **json** and **xml**. Here is example of how to build xml response:
 
 ```ruby
   webmock_method :purchase, [:amount, :credit_card], lambda { |binding|
       RenderHelper.render :xml, "#{File.dirname(__FILE__)}/templates/purchase_response.xml.erb", binding
     }
+```
+
+You can tweak you response on the fly:
+
+```ruby
+  webmock_method :purchase, [:amount, :credit_card], lambda { |binding|
+    RenderHelper.render :xml, "#{File.dirname(__FILE__)}/templates/purchase_response.xml.erb", binding
+    } do |parent, _, credit_card|
+    if credit_card.card_type == "VISA"
+      define_attribute(parent, :success,  true)
+    else
+      define_attribute(parent, :success,  false)
+      define_attribute(parent, :error_message, "Unsupported Credit Card Type")
+    end
+  end
+```
+
+and then, use new defined attributes, such as **success** and **error_message** inside your template:
+
+```xml
+<!-- stubs/templates/purchase_response.xml.erb -->
+<PurchaseResponse>
+  <Success><%= success %></Success>
+
+  <% unless success %>
+    <ErrorMessage><%= error_message %></ErrorMessage>
+  <% end %>
+</PurchaseResponse>
 ```
 
 **url** parameter is optional. If you don't specify it, it will try to use **url** attribute defined
@@ -113,9 +140,9 @@ WebmockMethod.url = "http://api.openweathermap.org/data/2.5/weather"
 And finally, create spec for testing your mocked service:
 
 ```ruby
-require "stubs/open_weather"
+require "stubs/open_weather_map_service"
 
-describe OpenWeather do
+describe OpenWeatherMapService do
   describe "#quote" do
     it "gets the quote" do
       result = JSON.parse(subject.quote("plainsboro, nj", "imperial"))

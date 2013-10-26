@@ -1,5 +1,4 @@
 require 'webmock'
-require 'erb'
 require 'meta_methods/meta_methods'
 
 module WebmockMethod

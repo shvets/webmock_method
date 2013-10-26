@@ -2,7 +2,7 @@
 
 require 'net/http'
 
-class OpenWeather
+class OpenWeatherMapService
   attr_reader :url
 
   def initialize
@@ -23,7 +23,7 @@ end
 require 'webmock_method'
 require 'json'
 
-class OpenWeather
+class OpenWeatherMapService
   extend WebmockMethod
 
   webmock_method :quote, [:location, :units], lambda { |binding|
@@ -33,7 +33,7 @@ end
 
 # 3. Test service mock
 
-describe OpenWeather do
+describe OpenWeatherMapService do
   describe "#quote" do
     it "gets the quote" do
       result = JSON.parse(subject.quote("plainsboro, nj", "imperial"))
