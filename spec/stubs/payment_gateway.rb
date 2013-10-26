@@ -6,7 +6,7 @@ class PaymentGateway
   extend WebmockMethod
 
   webmock_method :purchase, [:amount, :credit_card], lambda { |binding|
-    RenderHelper.render :xml, "#{File.dirname(__FILE__)}/templates/purchase_response.xml.erb", binding
+    RenderHelper.render :erb, "#{File.dirname(__FILE__)}/templates/purchase_response.xml.erb", binding
     } do |parent, _, credit_card|
     if credit_card.card_type == "VISA"
       define_attribute(parent, :success,  true)

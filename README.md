@@ -27,7 +27,7 @@ require 'webmock'
 
 WebMock.stub_request(:any, "www.example.com").to_return(:body => "some body")
 
-puts Net::HTTP.get("www.example.com", "/") # some body
+expect(Net::HTTP.get("www.example.com", "/")).to eq "some body"
 ```
 
 It will stub all http verbs (GET, POST, PUT etc.) thanks to **:any** parameter.
@@ -80,8 +80,8 @@ require 'services/open_weather_map_service.rb'
 class OpenWeatherMapService
   extend WebmockMethod
 
-  webmock_method :quote, [:location, :units], lambda { |binding|
-      RenderHelper.render :json, "#{File.dirname(__FILE__)}/stubs/templates/quote_response.json.erb", binding
+  webmock_method :quote, [:location, :units], lambda { |_|
+      File.open "#{File.dirname(__FILE__)}/stubs/templates/quote_response.json.erb"
     }, /#{WebmockMethod.url}/
 end
 ```
@@ -94,19 +94,19 @@ end
 * **url** to remote service (optional).
 
 You can build responses of arbitrary complexity with your own code or you can use **RenderHelper**, that comes with this
-gem. Currently it supports 2 formats only: **json** and **xml**. Here is example of how to build xml response:
+gem. Currently it supports **erb** renderer only. Here is example of how to build xml response:
 
 ```ruby
   webmock_method :purchase, [:amount, :credit_card], lambda { |binding|
-      RenderHelper.render :xml, "#{File.dirname(__FILE__)}/templates/purchase_response.xml.erb", binding
+      RenderHelper.render :erb, "#{File.dirname(__FILE__)}/templates/purchase_response.xml.erb", binding
     }
 ```
 
-You can tweak you response on the fly:
+It's possible to tweak your response on the fly:
 
 ```ruby
   webmock_method :purchase, [:amount, :credit_card], lambda { |binding|
-    RenderHelper.render :xml, "#{File.dirname(__FILE__)}/templates/purchase_response.xml.erb", binding
+    RenderHelper.render :erb, "#{File.dirname(__FILE__)}/templates/purchase_response.xml.erb", binding
     } do |parent, _, credit_card|
     if credit_card.card_type == "VISA"
       define_attribute(parent, :success,  true)
@@ -117,7 +117,7 @@ You can tweak you response on the fly:
   end
 ```
 
-and then, use new defined attributes, such as **success** and **error_message** inside your template:
+and then, use newly defined attributes, such as **success** and **error_message** inside your template:
 
 ```xml
 <!-- stubs/templates/purchase_response.xml.erb -->
@@ -130,7 +130,7 @@ and then, use new defined attributes, such as **success** and **error_message** 
 </PurchaseResponse>
 ```
 
-**url** parameter is optional. If you don't specify it, it will try to use **url** attribute defined
+**url** parameter is optional. If you don't specify it, gem will try to use **url** attribute defined
 on your service or you can define **url** parameter for WebmockMethod:
 
 ```ruby
