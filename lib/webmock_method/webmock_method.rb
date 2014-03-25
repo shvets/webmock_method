@@ -10,12 +10,12 @@ module WebmockMethod
     attr_accessor :url
   end
 
-  def webmock_method(method_name, param_names, response_proc, url = nil)
-    object = self
+  def webmock_method(method_name, param_names, response_proc, url=nil)
+    current_class = self
 
     define_method("#{method_name}_with_webmock_method") do |*args|
       param_names.each_with_index do |param_name, index|
-        object.define_attribute(self, param_name, args[index])
+        current_class.define_attribute(self, param_name, args[index])
       end
 
       yield(self, *args) if block_given?
@@ -32,15 +32,24 @@ module WebmockMethod
         else
           response = response_proc.call(binding)
 
+          #$responses ||= []
+          #
+          #$responses << response
+
           WebMock.stub_request(:any, request_url).to_return(:body => response)
         end
 
         send("#{method_name}_without_webmock_method", *args)
       rescue Exception => e
-        # puts e.message
         raise e
       ensure
         WebMock.reset!
+
+        #$responses.pop
+        #
+        #previous_response = $responses.last
+        #
+        #stub_request(:any, StubWebMethod.stubbed_url(ignore_get_params, self.url)).to_return(:body => response) if previous_response
       end
     end
 
