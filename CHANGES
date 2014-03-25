@@ -14,3 +14,7 @@
 * Externalizing meta_methods.
 * Adding tests for error path.
 * Adding haml as supported renderer.
+
+== Version 1.2.0
+
+* Small change in API.
