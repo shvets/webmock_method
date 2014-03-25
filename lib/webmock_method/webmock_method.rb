@@ -23,6 +23,7 @@ module WebmockMethod
       begin
         request_url = url
         request_url = @url if request_url.nil?
+        request_url = self.url if request_url.nil?
         request_url = WebmockMethod.url if request_url.nil?
 
         throw "Url is not defined." unless request_url
