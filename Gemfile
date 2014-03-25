@@ -2,6 +2,8 @@ source "https://rubygems.org"
 
 group :default do
   gem "webmock"
+  gem "haml"
+  gem "meta_methods"
 end
 
 group :development do

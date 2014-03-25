@@ -1,4 +1,5 @@
 require 'erb'
+require 'haml'
 
 module RenderHelper
   extend self
@@ -9,6 +10,8 @@ module RenderHelper
     case format
       when :erb
         ERB.new(body).result binding
+      when :haml
+        Haml::Engine.new(body).render binding
       else
         body
     end

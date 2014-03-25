@@ -17,6 +17,10 @@ describe PaymentGateway do
       expect(response['success'][0]).to eq('false')
       expect(response['error_message'][0]).to eq('Unsupported Credit Card Type')
     end
+
+    it "returns error response if amount is negative" do
+      expect{subject.purchase(-1000, valid_credit_card)}.to raise_exception(Exception)
+    end
   end
 
   private

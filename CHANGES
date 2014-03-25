@@ -8,3 +8,9 @@
 == Version 1.0.1
 
 * Small bug fixes.
+
+== Version 1.1.0
+
+* Externalizing meta_methods.
+* Adding tests for error path.
+* Adding haml as supported renderer.
