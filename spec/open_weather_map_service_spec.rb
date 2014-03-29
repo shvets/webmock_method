@@ -34,12 +34,14 @@ end
 # 3. Test service mock
 
 # Make sure we don't hit external service: when stub is commented, test should fail
-WebMock.disable_net_connect!(allow_localhost: true)
+# WebMock.disable_net_connect!(allow_localhost: true)
 
 describe OpenWeatherMapService do
   describe "#quote" do
     it "gets the quote" do
       result = JSON.parse(subject.quote("plainsboro, nj", "imperial"))
+
+      p result
 
       expect(result['sys']['country']).to eq("United States of America")
     end

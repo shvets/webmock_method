@@ -94,10 +94,11 @@ end
 * **url** to remote service (optional).
 
 You can build responses of arbitrary complexity with your own code or you can use **RenderHelper**, that comes with this
-gem. Currently it supports **erb** renderer only. Here is example of how to build xml response:
+gem. Currently it supports **erb** and **haml** renderers only. Here is example of how to build xml response:
 
 ```ruby
-  webmock_method :purchase, [:amount, :credit_card], lambda { |binding|
+  webmock_method :purchase, [:amount, :credit_card],
+    lambda { |binding|
       RenderHelper.render :erb, "#{File.dirname(__FILE__)}/templates/purchase_response.xml.erb", binding
     }
 ```
@@ -105,8 +106,9 @@ gem. Currently it supports **erb** renderer only. Here is example of how to buil
 It's possible to tweak your response on the fly:
 
 ```ruby
-  webmock_method :purchase, [:amount, :credit_card], lambda { |binding|
-    RenderHelper.render :erb, "#{File.dirname(__FILE__)}/templates/purchase_response.xml.erb", binding
+  webmock_method :purchase, [:amount, :credit_card],
+    lambda { |binding|
+      RenderHelper.render :erb, "#{File.dirname(__FILE__)}/templates/purchase_response.xml.erb", binding
     } do |parent, _, credit_card|
     if credit_card.card_type == "VISA"
       define_attribute(parent, :success,  true)
@@ -151,6 +153,35 @@ describe OpenWeatherMapService do
     end
   end
 end
+```
+
+If you need to simulate exception raised inside the mocked method, do the following:
+
+```ruby
+  webmock_method :purchase, [:amount, :credit_card],
+                 lambda { |binding|
+                    # prepare response
+                    ...
+                  } do |parent, amount, credit_card|
+    define_attribute(parent, :error, create_error(parent, "Negative amount")) if amount < 0
+
+    ...
+  end
+
+  def self.create_error parent, reason
+    define_attribute(parent, :error, Exception.new(reason))
+  end
+
+end
+```
+
+**webmock** gem code is aware of **error** variable and will throw this exception, so yo can verify it inside
+your test:
+
+```ruby
+  it "returns error response if amount is negative" do
+    expect{subject.purchase(-1000, valid_credit_card)}.to raise_exception(Exception)
+  end
 ```
 
 ## Contributing
