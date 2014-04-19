@@ -73,14 +73,14 @@ Then, create stub/mock for your service:
 # stubs/open_weather_map_service.rb
 
 require 'webmock_method'
-require 'json'
 
 require 'services/open_weather_map_service.rb'
 
 class OpenWeatherMapService
   extend WebmockMethod
 
-  webmock_method :quote, [:location, :units], lambda { |_|
+  webmock_method :quote, [:location, :units],
+    lambda { |_|
       File.open "#{File.dirname(__FILE__)}/stubs/templates/quote_response.json.erb"
     }, /#{WebmockMethod.url}/
 end
@@ -142,6 +142,8 @@ WebmockMethod.url = "http://api.openweathermap.org/data/2.5/weather"
 And finally, create spec for testing your mocked service:
 
 ```ruby
+require 'json'
+
 require "stubs/open_weather_map_service"
 
 describe OpenWeatherMapService do

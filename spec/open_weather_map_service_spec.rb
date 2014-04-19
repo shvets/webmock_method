@@ -21,14 +21,14 @@ end
 # 2. Create service mock
 
 require 'webmock_method'
-require 'json'
 
 class OpenWeatherMapService
   extend WebmockMethod
 
-  webmock_method :quote, [:location, :units], lambda { |_|
-    File.open "#{File.dirname(__FILE__)}/stubs/templates/quote_response.json.erb"
-  }, /#{WebmockMethod.url}/
+  webmock_method :quote, [:location, :units],
+    lambda { |_|
+      File.open "#{File.dirname(__FILE__)}/stubs/templates/quote_response.json.erb"
+    }, /#{WebmockMethod.url}/
 end
 
 # 3. Test service mock
@@ -36,12 +36,12 @@ end
 # Make sure we don't hit external service: when stub is commented, test should fail
 # WebMock.disable_net_connect!(allow_localhost: true)
 
+require 'json'
+
 describe OpenWeatherMapService do
   describe "#quote" do
     it "gets the quote" do
       result = JSON.parse(subject.quote("plainsboro, nj", "imperial"))
-
-      p result
 
       expect(result['sys']['country']).to eq("United States of America")
     end
