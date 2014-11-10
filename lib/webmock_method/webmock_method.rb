@@ -1,8 +1,8 @@
 require 'webmock'
-require 'meta_methods'
+require 'meta_methods/core'
 
 module WebmockMethod
-  include MetaMethods::Core
+  # include MetaMethods::Core
 
   extend self
 
@@ -15,7 +15,7 @@ module WebmockMethod
 
     define_method("#{method_name}_with_webmock_method") do |*args|
       param_names.each_with_index do |param_name, index|
-        current_class.define_attribute(self, param_name, args[index])
+        MetaMethods::Core.instance.define_attribute(self, param_name, args[index])
       end
 
       yield(self, *args) if block_given?
