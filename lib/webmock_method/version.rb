@@ -1,3 +1,3 @@
-class WebmockMethod
-  VERSION = "1.2.2"
+module WebmockMethod
+  VERSION = "1.2.3"
 end
