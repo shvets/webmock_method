@@ -2,17 +2,16 @@ require 'webmock'
 require 'meta_methods/core'
 
 module WebmockMethod
-  # include MetaMethods::Core
-
-  extend self
 
   class << self
     attr_accessor :url
   end
 
-  def webmock_method(method_name, param_names, response_proc, url=nil)
-    current_class = self
+  def define_attribute object, key, value
+    MetaMethods::Core.instance.define_attribute(object, key, value)
+  end
 
+  def webmock_method(method_name, param_names, response_proc, url=nil)
     define_method("#{method_name}_with_webmock_method") do |*args|
       param_names.each_with_index do |param_name, index|
         MetaMethods::Core.instance.define_attribute(self, param_name, args[index])
@@ -56,7 +55,6 @@ module WebmockMethod
 
     alias_method :"#{method_name}_without_webmock_method", method_name
     alias_method method_name, :"#{method_name}_with_webmock_method"
-
   end
 
 end

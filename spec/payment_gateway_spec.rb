@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 require "stubs/payment_gateway"
 
 describe PaymentGateway do
@@ -25,24 +23,16 @@ describe PaymentGateway do
 
   private
 
+  def credit_card_class
+    Struct.new(:first_name, :last_name, :number, :card_type, :month, :year, :verification_value)
+  end
+
   def valid_credit_card
-    stub(
-      :first_name => "John",
-      last_name: "Appleseed",
-      number: "4242424242424242",
-      card_type: "VISA",
-      month: 8,
-      year: Time.now.year+1,
-      verification_value: "000"
-    )
+    credit_card_class.new("John", "Appleseed", "4242424242424242", "VISA", 8, Time.now.year+1, "000")
   end
 
   def invalid_credit_card
-    invalid_credit_card = valid_credit_card
-
-    invalid_credit_card.stubs(:card_type => "DISCOVER")
-
-    invalid_credit_card
+    credit_card_class.new
   end
 
 end
