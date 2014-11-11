@@ -2,6 +2,7 @@ require 'webmock'
 require 'meta_methods/core'
 
 module WebmockMethod
+  extend self
 
   class << self
     attr_accessor :url
